@@ -5,8 +5,9 @@ const fileUpload = require("express-fileupload");
 const myconn = require("./connection");
 
 // every single collection will need a model
-const Designer = require("./models/designers-model");
-// const Books = require("./models/books-model");
+const Designers = require("./models/designers-model");
+const Categories = require("./models/categories-model");
+const Artworks = require("./models/artworks-model");
 // const Comment = require("./models/comments-model");
 
 // init express, bodyparser now built in to express...
@@ -64,19 +65,48 @@ app.use("/api", router);
 
 // CRUD
 // CREATE Writer
-router.post("/writers", (req, res) => {
-    var newwriter = new Writer();
+// router.post("/writers", (req, res) => {
+//     var newwriter = new Writer();
+
+//     var data = req.body;
+//     console.log(">>> ", data);
+//     Object.assign(newwriter, data);
+
+//     newwriter.save().then(
+//         result => {
+//             return res.json(result);
+//         },
+//         () => {
+//             return res.send("problem adding new user");
+//         }
+//     );
+// });
+
+// CREATE artworks
+router.post("/artworks", (req, res) => {
+    var newartwork = new Artworks();
 
     var data = req.body;
     console.log(">>> ", data);
-    Object.assign(newwriter, data);
+    Object.assign(newartwork, data);
 
-    newwriter.save().then(
+    newartwork.save().then(
         result => {
             return res.json(result);
         },
         () => {
-            return res.send("problem adding new user");
+            return res.send("problem adding new artwork");
+        }
+    );
+});
+///FILTER THROUGH CATEGORIES 
+router.get("/artworks/category/:cat_id", (req, res) => {
+    Artworks.find({ cat_id: req.params.cat_id }).then(
+        (artworks) => {
+            res.json(artworks);
+        },
+        (error) => {
+            res.json({ result: 0 });
         }
     );
 });
@@ -91,12 +121,26 @@ router.post("/writers", (req, res) => {
 // });
 
 // READ all designers
-router.get("/designs", (req, res) => {
-    Designer.find()
+router.get("/designers", (req, res) => {
+    Designers.find()
+        .then(designers => {
+            res.json(designers);
+        });
+});
+// READ all categories
+router.get("/categories", (req, res) => {
+    Categories.find()
+        .then(categories => {
+            res.json(categories);
+        });
+});
 
-    .then(designs => {
-        res.json(designs);
-    });
+// READ all artworks
+router.get("/artworks", (req, res) => {
+    Artworks.find()
+        .then(artworks => {
+            res.json(artworks);
+        });
 });
 
 // DELETE A WRITER - Will probably never need this
@@ -112,10 +156,10 @@ router.delete("/writers/:id", (req, res) => {
     );
 });
 
-// CREATE NEW BOOK WITH OTIONAL IMAGE UPLOAD
+// CREATE NEW ARTWORK WITH OTIONAL IMAGE UPLOAD
 // image would be available at http://localhost:4000/myimage.jpg
-router.post("/books", (req, res) => {
-    var collectionModel = new Books();
+router.post("/categories", (req, res) => {
+    var collectionModel = new Categories();
 
     if (req.files) {
         var files = Object.values(req.files);
@@ -148,14 +192,33 @@ router.get("/books", (req, res) => {
 // READ ONE BOOK ONLY
 // Need to add  writers details and all comments to the book - use populate
 // - see the books model. Also need to sort the comments to most recent first.
-router.get("/books/:id", (req, res) => {
-    Books.findOne({ _id: req.params.id })
-        .populate("writers")
-        .populate({ path: "comments", options: { sort: { updatedAt: -1 } } })
-        .then(book => {
-            res.json([book]);
+// router.get("/books/:id", (req, res) => {
+//     Books.findOne({ _id: req.params.id })
+//         .populate("writers")
+//         .populate({ path: "comments", options: { sort: { updatedAt: -1 } } })
+//         .then(book => {
+//             res.json([book]);
+//         });
+// });
+
+router.get("/artworks/cat_id", (req, res) => {
+    Artworks.findOne({ cat_id: req.params.cat_id })
+        .populate("categories")
+        // .populate({ path: "comments", options: { sort: { updatedAt: -1 } } })
+        .then(artworks => {
+            res.json([Artworks]);
         });
 });
+
+// router.get(`/artworks/:id`, (req, res) => {
+//     console.log("looking for single book infossss")
+//     Artworks.findOne({ _id: req.params.id }, function(err, objFromDB) {
+//         res.json([objFromDB])
+//             //OR
+//             // return res.send(objFromDB);
+//     });
+// });
+
 
 // POST a comment - every new comment is tied to a book title
 // book title is stored in a hidden input field inside our form
