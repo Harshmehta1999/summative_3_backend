@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 const Designer = require("./designers-model");
 const Categories = require("./categories-model");
-// const Comment = require("./comments-model");
+const Comments = require("./comments-model");
 
 // When viewing book details we may need the writer and user comments
 // so this model links to two other collectons
@@ -15,7 +15,7 @@ var ArtworksSchema = new Schema({
     cat_id: Number,
     synopsis: String,
     profile_image: String,
-    id: { type: Number, default: Date.now() }
+    _id: { type: Number, default: Date.now() }
 
 }, {
     timestamps: true,
@@ -31,9 +31,9 @@ var ArtworksSchema = new Schema({
 // });
 
 // ArtworksSchema.virtual("comments", {
-//     ref: "Comment",
-//     localField: "title",
-//     foreignField: "book_title",
+//     ref: "Comments",
+//     localField: "artwork_title",
+//     foreignField: "comment",
 //     justOne: false
 // });
 

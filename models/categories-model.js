@@ -20,12 +20,12 @@ var CategoriesSchema = new Schema({
     timestamps: true,
     toJSON: { virtuals: true }
 });
-CategoriesSchema.virtual("artworks", {
-    ref: "Artwork",
-    localField: "cat_id",
-    foreignField: "id",
-    justOne: true
-});
+// CategoriesSchema.virtual("artworks", {
+//     ref: "Artwork",
+//     localField: "cat_id",
+//     foreignField: "id",
+//     justOne: true
+// });
 
 // CategoriesSchema.virtual("comments", {
 //     ref: "Comment",

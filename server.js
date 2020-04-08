@@ -8,7 +8,7 @@ const myconn = require("./connection");
 const Designers = require("./models/designers-model");
 const Categories = require("./models/categories-model");
 const Artworks = require("./models/artworks-model");
-// const Comment = require("./models/comments-model");
+const Comments = require("./models/comments-model");
 
 // init express, bodyparser now built in to express...
 const app = express();
@@ -111,14 +111,17 @@ router.get("/artworks/category/:cat_id", (req, res) => {
     );
 });
 
-// // READ all writers
-// router.get("/designers", (req, res) => {
-//     Writer.find()
-//         .populate("books")
-//         .then(writers => {
-//             res.json(writers);
-//         });
-// });
+///get indi
+
+router.get(`/artworks/:id`, (req, res) => {
+    console.log("looking for single artwork infossss")
+    Artworks.findOne({ _id: req.params.id }, function(err, objFromDB) {
+        res.json([objFromDB])
+            //OR
+            // return res.send(objFromDB);
+    });
+});
+
 
 // READ all designers
 router.get("/designers", (req, res) => {
@@ -143,6 +146,14 @@ router.get("/artworks", (req, res) => {
         });
 });
 
+// READ all designers
+router.get("/comments", (req, res) => {
+    Comments.find()
+        .then(comments => {
+            res.json(comments);
+        });
+});
+
 // DELETE A WRITER - Will probably never need this
 // send this endpoint the mongo _id and it ill delete the writer
 router.delete("/writers/:id", (req, res) => {
@@ -158,36 +169,36 @@ router.delete("/writers/:id", (req, res) => {
 
 // CREATE NEW ARTWORK WITH OTIONAL IMAGE UPLOAD
 // image would be available at http://localhost:4000/myimage.jpg
-router.post("/categories", (req, res) => {
-    var collectionModel = new Categories();
+// router.post("/categories", (req, res) => {
+//     var collectionModel = new Categories();
 
-    if (req.files) {
-        var files = Object.values(req.files);
-        var uploadedFileObject = files[0];
-        var uploadedFileName = uploadedFileObject.name;
-        var nowTime = Date.now();
-        var newFileName = `${nowTime}_${uploadedFileName}`;
+//     if (req.files) {
+//         var files = Object.values(req.files);
+//         var uploadedFileObject = files[0];
+//         var uploadedFileName = uploadedFileObject.name;
+//         var nowTime = Date.now();
+//         var newFileName = `${nowTime}_${uploadedFileName}`;
 
-        uploadedFileObject.mv(`public/${newFileName}`).then(
-            params => {
-                updateAfterFileUpload(req, res, collectionModel, newFileName);
-            },
-            params => {
-                updateAfterFileUpload(req, res, collectionModel);
-            }
-        );
-    } else {
-        updateAfterFileUpload(req, res, collectionModel);
-    }
-});
+//         uploadedFileObject.mv(`public/${newFileName}`).then(
+//             params => {
+//                 updateAfterFileUpload(req, res, collectionModel, newFileName);
+//             },
+//             params => {
+//                 updateAfterFileUpload(req, res, collectionModel);
+//             }
+//         );
+//     } else {
+//         updateAfterFileUpload(req, res, collectionModel);
+//     }
+// });
 // READ All BOOKS
-router.get("/books", (req, res) => {
-    Books.find()
-        .populate("writers")
-        .then(books => {
-            res.json(books);
-        });
-});
+// router.get("/books", (req, res) => {
+//     Books.find()
+//         .populate("writers")
+//         .then(books => {
+//             res.json(books);
+//         });
+// });
 
 // READ ONE BOOK ONLY
 // Need to add  writers details and all comments to the book - use populate
@@ -206,7 +217,7 @@ router.get("/artworks/cat_id", (req, res) => {
         .populate("categories")
         // .populate({ path: "comments", options: { sort: { updatedAt: -1 } } })
         .then(artworks => {
-            res.json([Artworks]);
+            res.json([artworks]);
         });
 });
 
@@ -219,24 +230,43 @@ router.get("/artworks/cat_id", (req, res) => {
 //     });
 // });
 
+// router.get(`/artworks/cat_id/:id`, (req, res) => {
+//     console.log("looking for single book infossss")
+//     Artworks.findOne({ _id: req.params.id }, function(err, objFromDB) {
+//         res.json([objFromDB])
+//             //OR
+//             // return res.send(objFromDB);
+//     });
+// });
+
+router.get(`/artworks/:id`, (req, res) => {
+    console.log("looking for single artworks infossss")
+    Artworks.findOne({ _id: req.params.id }, function(err, objFromDB) {
+        res.json([objFromDB])
+            //OR
+            // return res.send(objFromDB);
+    });
+});
+
+
 
 // POST a comment - every new comment is tied to a book title
 // book title is stored in a hidden input field inside our form
-router.post("/comments", (req, res) => {
-    var newComment = new Comment();
-    var data = req.body;
-    Object.assign(newComment, data);
-    console.log(">>> ", data);
+// router.post("/comments", (req, res) => {
+//     var newComment = new Comments();
+//     var data = req.body;
+//     Object.assign(newComment, data);
+//     console.log(">>> ", data);
 
-    newComment.save().then(
-        result => {
-            return res.json(result);
-        },
-        () => {
-            return res.send("problem adding new comment");
-        }
-    );
-});
+//     newComment.save().then(
+//         result => {
+//             return res.json(result);
+//         },
+//         () => {
+//             return res.send("problem adding new comment");
+//         }
+//     );
+// });
 
 //////////////////////////////////////////////////////////////////////
 /// CRUD FOR THE USERS collection Routes we did in class
