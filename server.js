@@ -406,17 +406,17 @@ router.put("/users/with-form-image/:id", (req, res) => {
 });
 
 // DELETE
-router.delete("/users/:id", (req, res) => {
-    // as a promise
-    User.deleteOne({ _id: req.params.id }).then(
-        () => {
-            res.json({ result: true });
-        },
-        () => {
-            res.json({ result: false });
-        }
-    );
-});
+// router.delete("/users/:id", (req, res) => {
+//     // as a promise
+//     User.deleteOne({ _id: req.params.id }).then(
+//         () => {
+//             res.json({ result: true });
+//         },
+//         () => {
+//             res.json({ result: false });
+//         }
+//     );
+// });
 //// END CRUD FOR USERS COLLECTION
 ///////////////////////////////////////////
 
