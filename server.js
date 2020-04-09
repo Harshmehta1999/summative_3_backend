@@ -218,14 +218,25 @@ router.delete("/writers/:id", (req, res) => {
 //         });
 // });
 
-router.get("/artworks/cat_id", (req, res) => {
-    Artworks.findOne({ cat_id: req.params.cat_id })
-        .populate("categories")
-        // .populate({ path: "comments", options: { sort: { updatedAt: -1 } } })
-        .then((artworks) => {
-            res.json([artworks]);
-        });
-});
+// router.get("/artworks/cat_id", (req, res) => {
+//     Artworks.findOne({ cat_id: req.params.cat_id })
+//         .populate("categories")
+//         // .populate({ path: "comments", options: { sort: { updatedAt: -1 } } })
+//         .then((artworks) => {
+//             res.json([artworks]);
+//         });
+// });
+
+// router.get("/artworks/category/:cat_id", (req, res) => {
+//     Artworks.find({ cat_id: req.params.cat_id }).then(
+//         (artworks) => {
+//             res.json(artworks);
+//         },
+//         (error) => {
+//             res.json({ result: 0 });
+//         }
+//     );
+// });
 
 // router.get(`/artworks/:id`, (req, res) => {
 //     console.log("looking for single book infossss")
@@ -245,14 +256,14 @@ router.get("/artworks/cat_id", (req, res) => {
 //     });
 // });
 
-router.get(`/artworks/:id`, (req, res) => {
-    console.log("looking for single artworks infossss");
-    Artworks.findOne({ _id: req.params.id }, function(err, objFromDB) {
-        res.json([objFromDB]);
-        //OR
-        // return res.send(objFromDB);
-    });
-});
+// router.get(`/artworks/:id`, (req, res) => {
+//     console.log("looking for single artworks infossss");
+//     Artworks.findOne({ _id: req.params.id }, function(err, objFromDB) {
+//         res.json([objFromDB]);
+//         //OR
+//         // return res.send(objFromDB);
+//     });
+// });
 
 // POST a comment - every new comment is tied to a book title
 // book title is stored in a hidden input field inside our form
