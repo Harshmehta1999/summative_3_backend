@@ -4,15 +4,18 @@ var Schema = mongoose.Schema;
 const Categories = require("./categories-model");
 
 // this will be our data base's data structure
-var DesignersSchema = new Schema({
+var DesignersSchema = new Schema(
+  {
     first_name: String,
     last_name: String,
     // product_description: String,
-    id: { type: Number, default: Date.now() }
-}, {
+    // id: { type: Number, default: Date.now() }
+  },
+  {
     timestamps: true,
-    toJSON: { virtuals: true }
-});
+    toJSON: { virtuals: true },
+  }
+);
 
 // DesignerSchema.virtual("categories", {
 //     ref: "Categories",

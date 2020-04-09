@@ -7,7 +7,8 @@ const Comments = require("./comments-model");
 // When viewing book details we may need the writer and user comments
 // so this model links to two other collectons
 
-var ArtworksSchema = new Schema({
+var ArtworksSchema = new Schema(
+  {
     artwork_title: String,
     artwork_subtitle: String,
     artwork_section: String,
@@ -15,12 +16,13 @@ var ArtworksSchema = new Schema({
     cat_id: Number,
     synopsis: String,
     profile_image: String,
-    _id: { type: Number, default: Date.now() }
-
-}, {
+    // _id: { type: Number, default: Date.now() }
+  },
+  {
     timestamps: true,
-    toJSON: { virtuals: true }
-});
+    toJSON: { virtuals: true },
+  }
+);
 // ArtworksSchema.virtual("categories", {
 //     ref: "categories",
 //     localField: "id",
