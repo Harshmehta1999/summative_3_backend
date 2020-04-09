@@ -4,7 +4,7 @@ const cors = require("cors");
 const fileUpload = require("express-fileupload");
 const myconn = require("./connection");
 
-// every single collection will need a model
+// every single collection will need a models
 const Designers = require("./models/designers-model");
 const Categories = require("./models/categories-model");
 const Artworks = require("./models/artworks-model");
