@@ -18,6 +18,11 @@ app.use(express.json());
 // added to allow us to upload images to public folder
 app.use(fileUpload());
 app.use(express.static("public"));
+
+
+
+var multer = require('multer')
+
 // end init express
 
 // my functions
@@ -63,6 +68,41 @@ const router = express.Router();
 // add api to beginning of all 'router' routes
 app.use("/api", router);
 
+
+
+// IMAGE UPLOAD// IMAGE UPLOAD// IMAGE UPLOAD
+
+var storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, './public/${newFileName}')
+    },
+    filename: function(req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname)
+    }
+})
+
+var upload = multer({ storage: storage }).single('file')
+
+router.post('/upload', function(req, res) {
+
+    upload(req, res, function(err) {
+        if (err instanceof multer.MulterError) {
+            return res.status(500).json(err)
+        } else if (err) {
+            return res.status(500).json(err)
+        }
+        return res.status(200).send(req.file)
+
+    })
+
+});
+
+
+
+
+
+// IMAGE UPLOAD// IMAGE UPLOAD// IMAGE UPLOAD// IMAGE UPLOAD
+
 // CRUD
 // CREATE Writer
 // router.post("/writers", (req, res) => {
@@ -82,6 +122,48 @@ app.use("/api", router);
 //     );
 // });
 
+// var storage = multer.diskStorage({
+//     destination: function(req, file, cb) {
+//         cb(null, 'public')
+//     },
+//     filename: function(req, file, cb) {
+//         cb(null, Date.now() + '-' + file.originalname)
+//     }
+// })
+
+// var upload = multer({ storage: storage }).single('file')
+
+
+// router.post("/artworks", function(req, res) {
+
+//     upload(req, res, function(err) {
+//         if (err instanceof multer.MulterError) {
+//             return res.status(500).json(err)
+//         } else if (err) {
+//             return res.status(500).json(err)
+//         }
+//         return res.status(200).send(req.file)
+
+//     })
+
+// });
+
+// router.post("/uploads", (req, res) => {
+//     var newartwork = new Artworks();
+
+//     var data = req.body;
+//     console.log(">>> ", data);
+//     Object.assign(newartwork, data);
+
+//     newartwork.save().then(
+//         (result) => {
+//             return res.json(result);
+//         },
+//         () => {
+//             return res.send("problem adding new artwork");
+//         }
+//     );
+// });
 // CREATE artworks
 router.post("/artworks", (req, res) => {
     var newartwork = new Artworks();
@@ -139,6 +221,12 @@ router.get("/designers", (req, res) => {
         res.json(designers);
     });
 });
+
+router.get("/uploads", (req, res) => {
+    Artworks.find().then((uploads) => {
+        res.json(uploads);
+    });
+});
 // READ all categories
 router.get("/categories", (req, res) => {
     Categories.find().then((categories) => {
@@ -153,7 +241,7 @@ router.get("/artworks", (req, res) => {
     });
 });
 
-// READ all designers
+// READ all comments
 router.get("/comments", (req, res) => {
     Comments.find().then((comments) => {
         res.json(comments);
@@ -162,21 +250,21 @@ router.get("/comments", (req, res) => {
 
 // DELETE A WRITER - Will probably never need this
 // send this endpoint the mongo _id and it ill delete the writer
-router.delete("/writers/:id", (req, res) => {
-    Writer.deleteOne({ _id: req.params.id }).then(
-        () => {
-            res.json({ result: true });
-        },
-        () => {
-            res.json({ result: false });
-        }
-    );
-});
+// router.delete("/writers/:id", (req, res) => {
+//     Writer.deleteOne({ _id: req.params.id }).then(
+//         () => {
+//             res.json({ result: true });
+//         },
+//         () => {
+//             res.json({ result: false });
+//         }
+//     );
+// });
 
 // CREATE NEW ARTWORK WITH OTIONAL IMAGE UPLOAD
 // image would be available at http://localhost:4000/myimage.jpg
-// router.post("/categories", (req, res) => {
-//     var collectionModel = new Categories();
+// router.post("/artworks", (req, res) => {
+//     var collectionModel = new Artworks();
 
 //     if (req.files) {
 //         var files = Object.values(req.files);
@@ -185,7 +273,34 @@ router.delete("/writers/:id", (req, res) => {
 //         var nowTime = Date.now();
 //         var newFileName = `${nowTime}_${uploadedFileName}`;
 
-//         uploadedFileObject.mv(`public/${newFileName}`).then(
+//         uploadedFileObject.mv(`./public/${newFileName}`).then(
+//             params => {
+//                 updateAfterFileUpload(req, res, collectionModel, newFileName);
+//             },
+//             params => {
+//                 updateAfterFileUpload(req, res, collectionModel);
+//             }
+//         );
+//     } else {
+//         updateAfterFileUpload(req, res, collectionModel);
+//     }
+// });
+
+
+
+// CREATE NEW ARTWORK WITH OTIONAL IMAGE UPLOAD
+// image would be available at http://localhost:4000/myimage.jpg
+// router.post("/artworks", (req, res) => {
+//     var collectionModel = new Artworks();
+
+//     if (req.files) {
+//         var files = Object.values(req.files);
+//         var uploadedFileObject = files[0];
+//         var uploadedFileName = uploadedFileObject.name;
+//         var nowTime = Date.now();
+//         var newFileName = `${nowTime}_${uploadedFileName}`;
+
+//         uploadedFileObject.mv(`./public/${newFileName}`).then(
 //             params => {
 //                 updateAfterFileUpload(req, res, collectionModel, newFileName);
 //             },
@@ -215,6 +330,19 @@ router.delete("/writers/:id", (req, res) => {
 //         .populate({ path: "comments", options: { sort: { updatedAt: -1 } } })
 //         .then(book => {
 //             res.json([book]);
+//         });
+// });
+
+// READ ONE BOOK ONLY
+// Need to add  writers details and all comments to the book - use populate
+// - see the books model. Also need to sort the comments to most recent first.
+// router.get("/artworks/:id", (req, res) => {
+//     Artworks.findOne({ _id: req.params.id })
+//         .populate("categories")
+//         .populate({ path: "comments" })
+//         // .populate({ path: "comments", options: { sort: { updatedAt: -1 } } })
+//         .then(artworks => {
+//             res.json([comments]);
 //         });
 // });
 
@@ -267,45 +395,69 @@ router.delete("/writers/:id", (req, res) => {
 
 // POST a comment - every new comment is tied to a book title
 // book title is stored in a hidden input field inside our form
-// router.post("/comments", (req, res) => {
-//     var newComment = new Comments();
-//     var data = req.body;
-//     Object.assign(newComment, data);
-//     console.log(">>> ", data);
+router.post("/comments", (req, res) => {
+    var newComment = new Comments();
 
-//     newComment.save().then(
-//         result => {
-//             return res.json(result);
-//         },
-//         () => {
-//             return res.send("problem adding new comment");
-//         }
-//     );
-// });
+    var data = req.body;
+    Object.assign(newComment, data);
+    console.log(">>> ", data);
+
+    newComment.save().then(
+        result => {
+            return res.json(result);
+        },
+        () => {
+            return res.send("problem adding new comment");
+        }
+    );
+});
 
 //////////////////////////////////////////////////////////////////////
 /// CRUD FOR THE USERS collection Routes we did in class
 
 // for normal form , no images
-router.post("/users", (req, res) => {
-    var userModel = new User();
+// router.post("/users", (req, res) => {
+//     var userModel = new User();
 
-    var data = req.body;
-    Object.assign(userModel, data);
+//     var data = req.body;
+//     Object.assign(userModel, data);
 
-    userModel.save().then(
-        (user) => {
-            res.json({ result: true });
-        },
-        () => {
-            res.json({ result: false });
-        }
-    );
-});
+//     userModel.save().then(
+//         (user) => {
+//             res.json({ result: true });
+//         },
+//         () => {
+//             res.json({ result: false });
+//         }
+//     );
+// });
 
 // for form , with one optional image max
-router.post("/users/form-with-image", (req, res) => {
-    var userModel = new User();
+// router.post("/users/form-with-image", (req, res) => {
+//     var userModel = new User();
+
+//     if (req.files) {
+//         var files = Object.values(req.files);
+//         var uploadedFileObject = files[0];
+//         var uploadedFileName = uploadedFileObject.name;
+//         var nowTime = Date.now();
+//         var newFileName = `${nowTime}_${uploadedFileName}`;
+
+//         uploadedFileObject.mv(`public/${newFileName}`).then(
+//             (params) => {
+//                 updateAfterFileUpload(req, res, userModel, newFileName);
+//             },
+//             (params) => {
+//                 updateAfterFileUpload(req, res, userModel);
+//             }
+//         );
+//     } else {
+//         updateAfterFileUpload(req, res, userModel);
+//     }
+// });
+
+router.post("/artworks/form-with-image", (req, res) => {
+    var userModel = new Artworks();
 
     if (req.files) {
         var files = Object.values(req.files);
@@ -328,82 +480,82 @@ router.post("/users/form-with-image", (req, res) => {
 });
 
 // READ
-router.get("/users", (req, res) => {
-    // .sort({ age: "descending" })
-    User.find().then(
-        (usersFromDataBase) => {
-            res.json(usersFromDataBase);
-        },
-        () => {
-            res.json({ result: false });
-        }
-    );
-});
+// router.get("/users", (req, res) => {
+//     // .sort({ age: "descending" })
+//     User.find().then(
+//         (usersFromDataBase) => {
+//             res.json(usersFromDataBase);
+//         },
+//         () => {
+//             res.json({ result: false });
+//         }
+//     );
+// });
 
 // find and return a single user based upon _id
-router.get("/users/:id", (req, res) => {
-    User.findOne({ _id: req.params.id }, function(err, objFromDB) {
-        //exit now if any kind of error
-        if (err) return res.json({ result: false });
-        res.send(objFromDB);
-    });
-});
+// router.get("/users/:id", (req, res) => {
+//     User.findOne({ _id: req.params.id }, function(err, objFromDB) {
+//         //exit now if any kind of error
+//         if (err) return res.json({ result: false });
+//         res.send(objFromDB);
+//     });
+// });
 
 //UPDATE
 // update for users with no form image
-router.put("/users/:id", (req, res) => {
-    User.findOne({ _id: req.params.id }, function(err, objFromDB) {
-        if (err)
-            return res.json({
-                result: false,
-            });
-        var data = req.body;
-        Object.assign(objFromDB, data);
-        objFromDB.save().then(
-            (response) => {
-                res.json({
-                    result: true,
-                });
-            },
-            (error) => {
-                res.json({
-                    result: false,
-                });
-            }
-        );
-    });
-});
+// router.put("/users/:id", (req, res) => {
+//     User.findOne({ _id: req.params.id }, function(err, objFromDB) {
+//         if (err)
+//             return res.json({
+//                 result: false,
+//             });
+//         var data = req.body;
+//         Object.assign(objFromDB, data);
+//         objFromDB.save().then(
+//             (response) => {
+//                 res.json({
+//                     result: true,
+//                 });
+//             },
+//             (error) => {
+//                 res.json({
+//                     result: false,
+//                 });
+//             }
+//         );
+//     });
+// });
 
 // update for users with form image
-router.put("/users/with-form-image/:id", (req, res) => {
-    User.findOne({ _id: req.params.id }, function(err, objFromDB) {
-        if (err)
-            return res.json({
-                result: false,
-            });
+// router.put("/users/with-form-image/:id", (req, res) => {
+//     User.findOne({ _id: req.params.id }, function(err, objFromDB) {
+//         if (err)
+//             return res.json({
+//                 result: false,
+//             });
 
-        if (req.files) {
-            var files = Object.values(req.files);
-            var uploadedFileObject = files[0];
-            var uploadedFileName = uploadedFileObject.name;
-            var nowTime = Date.now();
-            var newFileName = `${nowTime}_${uploadedFileName}`;
+//         if (req.files) {
+//             var files = Object.values(req.files);
+//             var uploadedFileObject = files[0];
+//             var uploadedFileName = uploadedFileObject.name;
+//             var nowTime = Date.now();
+//             var newFileName = `${nowTime}_${uploadedFileName}`;
 
-            uploadedFileObject.mv(`public/${newFileName}`).then(
-                (params) => {
-                    updateAfterFileUpload(req, res, objFromDB, newFileName);
-                },
-                (params) => {
-                    updateAfterFileUpload(req, res, objFromDB);
-                }
-            );
-        } else {
-            updateAfterFileUpload(req, res, objFromDB);
-        }
+//             uploadedFileObject.mv(`public/${newFileName}`).then(
+//                 (params) => {
+//                     updateAfterFileUpload(req, res, objFromDB, newFileName);
+//                 },
+//                 (params) => {
+//                     updateAfterFileUpload(req, res, objFromDB);
+//                 }
+//             );
+//         } else {
+//             updateAfterFileUpload(req, res, objFromDB);
+//         }
 
-        /////////
-    });
-});
+
+//     });
+// });
 
 // DELETE
 // router.delete("/users/:id", (req, res) => {

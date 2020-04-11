@@ -14,7 +14,11 @@ var ArtworksSchema = new Schema({
     price: Number,
     cat_id: Number,
     synopsis: String,
-    profile_image: String,
+    myImage: String,
+    img: { data: Buffer, contentType: String }
+
+
+
     // _id: { type: Number, default: Date.now() }
 }, {
     timestamps: true,
@@ -29,12 +33,12 @@ var ArtworksSchema = new Schema({
 
 // });
 
-// ArtworksSchema.virtual("comments", {
-//     ref: "Comments",
-//     localField: "artwork_title",
-//     foreignField: "comment",
-//     justOne: false
-// });
+ArtworksSchema.virtual("comments", {
+    ref: "Comments",
+    localField: "artwork_title",
+    foreignField: "comment",
+    justOne: false
+});
 
 // singular capitalized name for the mongo collection
 // the collection in your database should be lowercase and plural
