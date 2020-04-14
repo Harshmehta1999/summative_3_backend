@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 var Schema = mongoose.Schema;
-const Designer = require("./designers-model");
-const Comment = require("./comments-model");
-const Artwork = require("./artworks-model")
+
+const Comments = require("./comments-model");
+const Artworks = require("./artworks-model")
 
 
 // When viewing book details we may need the writer and user comments

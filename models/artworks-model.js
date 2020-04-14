@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 var Schema = mongoose.Schema;
-const Designer = require("./designers-model");
+// const Designer = require("./designers-model");
 const Categories = require("./categories-model");
 const Comments = require("./comments-model");
 
@@ -12,10 +12,13 @@ var ArtworksSchema = new Schema({
     artwork_subtitle: String,
     artwork_section: String,
     price: Number,
+    image: String,
     cat_id: Number,
     synopsis: String,
-    myImage: String,
-    img: { data: Buffer, contentType: String }
+    // comment: String,
+    // myImage: String,
+
+    // img: { data: Buffer, contentType: String }
 
 
 
@@ -33,12 +36,20 @@ var ArtworksSchema = new Schema({
 
 // });
 
-ArtworksSchema.virtual("comments", {
-    ref: "Comments",
-    localField: "artwork_title",
-    foreignField: "comment",
-    justOne: false
-});
+// ArtworksSchema.virtual("comments", {
+//     ref: "Comments",
+//     localField: "artwork_title",
+//     foreignField: "comment",
+//     justOne: false
+// });
+
+
+// ArtworksSchema.virtual("comments", {
+//     ref: "Comments",
+//     localField: "id",
+//     foreignField: "item_id",
+//     justOne: false
+// });
 
 // singular capitalized name for the mongo collection
 // the collection in your database should be lowercase and plural

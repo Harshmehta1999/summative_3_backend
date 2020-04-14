@@ -5,10 +5,11 @@ const fileUpload = require("express-fileupload");
 const myconn = require("./connection");
 
 // every single collection will need a model
-const Designers = require("./models/designers-model");
+
 const Categories = require("./models/categories-model");
 const Artworks = require("./models/artworks-model");
 const Comments = require("./models/comments-model");
+
 
 // init express, bodyparser now built in to express...
 const app = express();
@@ -68,103 +69,79 @@ const router = express.Router();
 // add api to beginning of all 'router' routes
 app.use("/api", router);
 
+// LAST UPDATE// LAST UPDATE// LAST UPDATE// LAST UPDATE
 
-
-// IMAGE UPLOAD// IMAGE UPLOAD// IMAGE UPLOAD
-
-var storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, './public/${newFileName}')
-    },
-    filename: function(req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname)
-    }
-})
-
-var upload = multer({ storage: storage }).single('file')
-
-router.post('/upload', function(req, res) {
-
-    upload(req, res, function(err) {
-        if (err instanceof multer.MulterError) {
-            return res.status(500).json(err)
-        } else if (err) {
-            return res.status(500).json(err)
-        }
-        return res.status(200).send(req.file)
-
-    })
-
+router.get("/artworks", (req, res) => {
+    Artworks.find()
+        .populate("comments")
+        .then((data) => {
+            res.json(data);
+        });
 });
 
+router.get("/artworks/:id", (req, res) => {
+    Artworks.findOne({ _id: req.params.id })
+        // .populate("useritems")
+        .populate({ path: "comments", options: { sort: { updatedAt: -1 } } })
+        .then((artworks) => {
+            res.json([artworks]);
+        });
+});
+
+// IMAGE POST// IMAGE POST// IMAGE POST
+
+router.post("/artworks", (req, res) => {
+    var collectionModel = new Artworks();
+
+    console.log("++++ ", req.body);
+
+    if (req.files) {
+        var files = Object.values(req.files);
+        var uploadedFileObject = files[0];
+        var uploadedFileName = uploadedFileObject.name;
+        var nowTime = Date.now();
+        var newFileName = `${nowTime}_${uploadedFileName}`;
+
+        uploadedFileObject.mv(`public/${newFileName}`).then(
+            (params) => {
+                updateAfterFileUpload(req, res, collectionModel, newFileName);
+            },
+            (params) => {
+                updateAfterFileUpload(req, res, collectionModel);
+            }
+        );
+    } else {
+        updateAfterFileUpload(req, res, collectionModel);
+    }
+});
+
+// IMAGE POST// IMAGE POST// IMAGE POST
 
 
+// POST COMMENTS// POST COMMENTS// POST COMMENTS
+
+router.post("/comments", (req, res) => {
+    var newcomment = new Comments();
+
+    var data = req.body;
+    console.log(">>> ", data);
+    Object.assign(newcomment, data);
+
+    newcomment.save().then(
+        (result) => {
+            return res.json(result);
+        },
+        () => {
+            return res.send("problem adding new comment");
+        }
+    );
+});
+
+// POST COMMENTS// POST COMMENTS// POST COMMENTS
 
 
-// IMAGE UPLOAD// IMAGE UPLOAD// IMAGE UPLOAD// IMAGE UPLOAD
+// POST ARTWORK// POST ARTWORK// POST ARTWORK
 
-// CRUD
-// CREATE Writer
-// router.post("/writers", (req, res) => {
-//     var newwriter = new Writer();
-
-//     var data = req.body;
-//     console.log(">>> ", data);
-//     Object.assign(newwriter, data);
-
-//     newwriter.save().then(
-//         result => {
-//             return res.json(result);
-//         },
-//         () => {
-//             return res.send("problem adding new user");
-//         }
-//     );
-// });
-
-// var storage = multer.diskStorage({
-//     destination: function(req, file, cb) {
-//         cb(null, 'public')
-//     },
-//     filename: function(req, file, cb) {
-//         cb(null, Date.now() + '-' + file.originalname)
-//     }
-// })
-
-// var upload = multer({ storage: storage }).single('file')
-
-
-// router.post("/artworks", function(req, res) {
-
-//     upload(req, res, function(err) {
-//         if (err instanceof multer.MulterError) {
-//             return res.status(500).json(err)
-//         } else if (err) {
-//             return res.status(500).json(err)
-//         }
-//         return res.status(200).send(req.file)
-
-//     })
-
-// });
-
-// router.post("/uploads", (req, res) => {
-//     var newartwork = new Artworks();
-
-//     var data = req.body;
-//     console.log(">>> ", data);
-//     Object.assign(newartwork, data);
-
-//     newartwork.save().then(
-//         (result) => {
-//             return res.json(result);
-//         },
-//         () => {
-//             return res.send("problem adding new artwork");
-//         }
-//     );
-// });
-// CREATE artworks
 router.post("/artworks", (req, res) => {
     var newartwork = new Artworks();
 
@@ -182,16 +159,10 @@ router.post("/artworks", (req, res) => {
     );
 });
 
-router.get("/artworks", (req, res) => {
-    Artworks.find().then(
-        (artworks) => {
-            res.json(artworks);
-        },
-        (error) => {
-            res.json({ result: 0 });
-        }
-    );
-});
+
+// POST ARTWORK// POST ARTWORK// POST ARTWORK
+
+
 ///FILTER THROUGH CATEGORIES
 router.get("/artworks/category/:cat_id", (req, res) => {
     Artworks.find({ cat_id: req.params.cat_id }).then(
@@ -204,23 +175,21 @@ router.get("/artworks/category/:cat_id", (req, res) => {
     );
 });
 
-///get indi
+///FILTER THROUGH CATEGORIES
+
+///GET INDIVIDUAL ARTWORKS
 
 router.get(`/artworks/:id`, (req, res) => {
     console.log("looking for single artwork infossss");
     Artworks.findOne({ _id: req.params.id }, function(err, objFromDB) {
         res.json([objFromDB]);
-        //OR
-        // return res.send(objFromDB);
+
     });
 });
 
-// READ all designers
-router.get("/designers", (req, res) => {
-    Designers.find().then((designers) => {
-        res.json(designers);
-    });
-});
+///GET INDIVIDUAL ARTWORKS
+
+// GET ROUTES FOR ALL// GET ROUTES FOR ALL// GET ROUTES FOR ALL
 
 router.get("/uploads", (req, res) => {
     Artworks.find().then((uploads) => {
@@ -248,6 +217,10 @@ router.get("/comments", (req, res) => {
     });
 });
 
+
+// GET ROUTES FOR ALL// GET ROUTES FOR ALL// GET ROUTES FOR ALL
+
+
 // DELETE A WRITER - Will probably never need this
 // send this endpoint the mongo _id and it ill delete the writer
 // router.delete("/writers/:id", (req, res) => {
@@ -261,316 +234,31 @@ router.get("/comments", (req, res) => {
 //     );
 // });
 
-// CREATE NEW ARTWORK WITH OTIONAL IMAGE UPLOAD
-// image would be available at http://localhost:4000/myimage.jpg
-// router.post("/artworks", (req, res) => {
-//     var collectionModel = new Artworks();
-
-//     if (req.files) {
-//         var files = Object.values(req.files);
-//         var uploadedFileObject = files[0];
-//         var uploadedFileName = uploadedFileObject.name;
-//         var nowTime = Date.now();
-//         var newFileName = `${nowTime}_${uploadedFileName}`;
-
-//         uploadedFileObject.mv(`./public/${newFileName}`).then(
-//             params => {
-//                 updateAfterFileUpload(req, res, collectionModel, newFileName);
-//             },
-//             params => {
-//                 updateAfterFileUpload(req, res, collectionModel);
-//             }
-//         );
-//     } else {
-//         updateAfterFileUpload(req, res, collectionModel);
-//     }
-// });
 
 
-
-// CREATE NEW ARTWORK WITH OTIONAL IMAGE UPLOAD
-// image would be available at http://localhost:4000/myimage.jpg
-// router.post("/artworks", (req, res) => {
-//     var collectionModel = new Artworks();
-
-//     if (req.files) {
-//         var files = Object.values(req.files);
-//         var uploadedFileObject = files[0];
-//         var uploadedFileName = uploadedFileObject.name;
-//         var nowTime = Date.now();
-//         var newFileName = `${nowTime}_${uploadedFileName}`;
-
-//         uploadedFileObject.mv(`./public/${newFileName}`).then(
-//             params => {
-//                 updateAfterFileUpload(req, res, collectionModel, newFileName);
-//             },
-//             params => {
-//                 updateAfterFileUpload(req, res, collectionModel);
-//             }
-//         );
-//     } else {
-//         updateAfterFileUpload(req, res, collectionModel);
-//     }
-// });
-// READ All BOOKS
-// router.get("/books", (req, res) => {
-//     Books.find()
-//         .populate("writers")
-//         .then(books => {
-//             res.json(books);
-//         });
-// });
-
-// READ ONE BOOK ONLY
-// Need to add  writers details and all comments to the book - use populate
-// - see the books model. Also need to sort the comments to most recent first.
-// router.get("/books/:id", (req, res) => {
-//     Books.findOne({ _id: req.params.id })
-//         .populate("writers")
-//         .populate({ path: "comments", options: { sort: { updatedAt: -1 } } })
-//         .then(book => {
-//             res.json([book]);
-//         });
-// });
-
-// READ ONE BOOK ONLY
-// Need to add  writers details and all comments to the book - use populate
-// - see the books model. Also need to sort the comments to most recent first.
-// router.get("/artworks/:id", (req, res) => {
-//     Artworks.findOne({ _id: req.params.id })
-//         .populate("categories")
-//         .populate({ path: "comments" })
-//         // .populate({ path: "comments", options: { sort: { updatedAt: -1 } } })
-//         .then(artworks => {
-//             res.json([comments]);
-//         });
-// });
-
-// router.get("/artworks/cat_id", (req, res) => {
-//     Artworks.findOne({ cat_id: req.params.cat_id })
-//         .populate("categories")
-//         // .populate({ path: "comments", options: { sort: { updatedAt: -1 } } })
-//         .then((artworks) => {
-//             res.json([artworks]);
-//         });
-// });
-
-// router.get("/artworks/category/:cat_id", (req, res) => {
-//     Artworks.find({ cat_id: req.params.cat_id }).then(
-//         (artworks) => {
-//             res.json(artworks);
-//         },
-//         (error) => {
-//             res.json({ result: 0 });
-//         }
-//     );
-// });
-
-// router.get(`/artworks/:id`, (req, res) => {
-//     console.log("looking for single book infossss")
-//     Artworks.findOne({ _id: req.params.id }, function(err, objFromDB) {
-//         res.json([objFromDB])
-//             //OR
-//             // return res.send(objFromDB);
-//     });
-// });
-
-// router.get(`/artworks/cat_id/:id`, (req, res) => {
-//     console.log("looking for single book infossss")
-//     Artworks.findOne({ _id: req.params.id }, function(err, objFromDB) {
-//         res.json([objFromDB])
-//             //OR
-//             // return res.send(objFromDB);
-//     });
-// });
-
-// router.get(`/artworks/:id`, (req, res) => {
-//     console.log("looking for single artworks infossss");
-//     Artworks.findOne({ _id: req.params.id }, function(err, objFromDB) {
-//         res.json([objFromDB]);
-//         //OR
-//         // return res.send(objFromDB);
-//     });
-// });
 
 // POST a comment - every new comment is tied to a book title
 // book title is stored in a hidden input field inside our form
-router.post("/comments", (req, res) => {
-    var newComment = new Comments();
-
-    var data = req.body;
-    Object.assign(newComment, data);
-    console.log(">>> ", data);
-
-    newComment.save().then(
-        result => {
-            return res.json(result);
-        },
-        () => {
-            return res.send("problem adding new comment");
-        }
-    );
-});
-
-//////////////////////////////////////////////////////////////////////
-/// CRUD FOR THE USERS collection Routes we did in class
-
-// for normal form , no images
-// router.post("/users", (req, res) => {
-//     var userModel = new User();
+// router.post("/comments", (req, res) => {
+//     var newComment = new Comments();
 
 //     var data = req.body;
-//     Object.assign(userModel, data);
+//     Object.assign(newComment, data);
+//     console.log(">>> ", data);
 
-//     userModel.save().then(
-//         (user) => {
-//             res.json({ result: true });
+//     newComment.save().then(
+//         result => {
+//             return res.json(result);
 //         },
 //         () => {
-//             res.json({ result: false });
+//             return res.send("problem adding new comment");
 //         }
 //     );
 // });
 
-// for form , with one optional image max
-// router.post("/users/form-with-image", (req, res) => {
-//     var userModel = new User();
-
-//     if (req.files) {
-//         var files = Object.values(req.files);
-//         var uploadedFileObject = files[0];
-//         var uploadedFileName = uploadedFileObject.name;
-//         var nowTime = Date.now();
-//         var newFileName = `${nowTime}_${uploadedFileName}`;
-
-//         uploadedFileObject.mv(`public/${newFileName}`).then(
-//             (params) => {
-//                 updateAfterFileUpload(req, res, userModel, newFileName);
-//             },
-//             (params) => {
-//                 updateAfterFileUpload(req, res, userModel);
-//             }
-//         );
-//     } else {
-//         updateAfterFileUpload(req, res, userModel);
-//     }
-// });
-
-router.post("/artworks/form-with-image", (req, res) => {
-    var userModel = new Artworks();
-
-    if (req.files) {
-        var files = Object.values(req.files);
-        var uploadedFileObject = files[0];
-        var uploadedFileName = uploadedFileObject.name;
-        var nowTime = Date.now();
-        var newFileName = `${nowTime}_${uploadedFileName}`;
-
-        uploadedFileObject.mv(`public/${newFileName}`).then(
-            (params) => {
-                updateAfterFileUpload(req, res, userModel, newFileName);
-            },
-            (params) => {
-                updateAfterFileUpload(req, res, userModel);
-            }
-        );
-    } else {
-        updateAfterFileUpload(req, res, userModel);
-    }
-});
-
-// READ
-// router.get("/users", (req, res) => {
-//     // .sort({ age: "descending" })
-//     User.find().then(
-//         (usersFromDataBase) => {
-//             res.json(usersFromDataBase);
-//         },
-//         () => {
-//             res.json({ result: false });
-//         }
-//     );
-// });
-
-// find and return a single user based upon _id
-// router.get("/users/:id", (req, res) => {
-//     User.findOne({ _id: req.params.id }, function(err, objFromDB) {
-//         //exit now if any kind of error
-//         if (err) return res.json({ result: false });
-//         res.send(objFromDB);
-//     });
-// });
-
-//UPDATE
-// update for users with no form image
-// router.put("/users/:id", (req, res) => {
-//     User.findOne({ _id: req.params.id }, function(err, objFromDB) {
-//         if (err)
-//             return res.json({
-//                 result: false,
-//             });
-//         var data = req.body;
-//         Object.assign(objFromDB, data);
-//         objFromDB.save().then(
-//             (response) => {
-//                 res.json({
-//                     result: true,
-//                 });
-//             },
-//             (error) => {
-//                 res.json({
-//                     result: false,
-//                 });
-//             }
-//         );
-//     });
-// });
-
-// update for users with form image
-// router.put("/users/with-form-image/:id", (req, res) => {
-//     User.findOne({ _id: req.params.id }, function(err, objFromDB) {
-//         if (err)
-//             return res.json({
-//                 result: false,
-//             });
-
-//         if (req.files) {
-//             var files = Object.values(req.files);
-//             var uploadedFileObject = files[0];
-//             var uploadedFileName = uploadedFileObject.name;
-//             var nowTime = Date.now();
-//             var newFileName = `${nowTime}_${uploadedFileName}`;
-
-//             uploadedFileObject.mv(`public/${newFileName}`).then(
-//                 (params) => {
-//                     updateAfterFileUpload(req, res, objFromDB, newFileName);
-//                 },
-//                 (params) => {
-//                     updateAfterFileUpload(req, res, objFromDB);
-//                 }
-//             );
-//         } else {
-//             updateAfterFileUpload(req, res, objFromDB);
-//         }
+//////////////////////////////////////////////////////////////////////
 
 
-//     });
-// });
-
-// DELETE
-// router.delete("/users/:id", (req, res) => {
-//     // as a promise
-//     User.deleteOne({ _id: req.params.id }).then(
-//         () => {
-//             res.json({ result: true });
-//         },
-//         () => {
-//             res.json({ result: false });
-//         }
-//     );
-// });
-//// END CRUD FOR USERS COLLECTION
-///////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////
 // THE rest of this is dealing with unhandled routes in a nice way //
