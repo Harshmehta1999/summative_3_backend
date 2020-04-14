@@ -4,13 +4,8 @@ const cors = require("cors");
 const fileUpload = require("express-fileupload");
 const myconn = require("./connection");
 
-<<<<<<< HEAD
-// every single collection will need a models
-const Designers = require("./models/designers-model");
-=======
 // every single collection will need a model
 
->>>>>>> harsh-branch-frontend
 const Categories = require("./models/categories-model");
 const Artworks = require("./models/artworks-model");
 const Comments = require("./models/comments-model");
