@@ -32,7 +32,7 @@ function updateAfterFileUpload(req, res, objFromDB, fileName) {
     var data = req.body;
     Object.assign(objFromDB, data);
 
-    objFromDB.profile_image = fileName;
+    objFromDB.image = fileName;
 
     objFromDB.save().then(
         (response) => {
@@ -142,22 +142,22 @@ router.post("/comments", (req, res) => {
 
 // POST ARTWORK// POST ARTWORK// POST ARTWORK
 
-router.post("/artworks", (req, res) => {
-    var newartwork = new Artworks();
+// router.post("/artworks", (req, res) => {
+//     var newartwork = new Artworks();
 
-    var data = req.body;
-    console.log(">>> ", data);
-    Object.assign(newartwork, data);
+//     var data = req.body;
+//     console.log(">>> ", data);
+//     Object.assign(newartwork, data);
 
-    newartwork.save().then(
-        (result) => {
-            return res.json(result);
-        },
-        () => {
-            return res.send("problem adding new artwork");
-        }
-    );
-});
+//     newartwork.save().then(
+//         (result) => {
+//             return res.json(result);
+//         },
+//         () => {
+//             return res.send("problem adding new artwork");
+//         }
+//     );
+// });
 
 
 // POST ARTWORK// POST ARTWORK// POST ARTWORK
