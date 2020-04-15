@@ -24,7 +24,6 @@ app.use(express.static("public"));
 
 var multer = require('multer')
 
-// end init express
 
 // my functions
 function updateAfterFileUpload(req, res, objFromDB, fileName) {
