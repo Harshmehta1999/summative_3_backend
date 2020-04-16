@@ -68,7 +68,7 @@ const router = express.Router();
 // add api to beginning of all 'router' routes
 app.use("/api", router);
 
-// LAST UPDATE// LAST UPDATE// LAST UPDATE// LAST UPDATE
+// ARTWORK STARTS// ARTWORK STARTS// ARTWORK STARTS// ARTWORK STARTS
 
 router.get("/artworks", (req, res) => {
     Artworks.find()
@@ -87,7 +87,47 @@ router.get("/artworks/:id", (req, res) => {
         });
 });
 
-// IMAGE POST// IMAGE POST// IMAGE POST
+
+router.delete("/artworks/:id", (req, res) => {
+    Artworks.deleteOne({ _id: req.params.id }).then(
+        () => {
+            res.json({ result: true });
+        },
+        () => {
+            res.json({ result: false });
+        }
+    );
+});
+
+router.put("/artworks/:id", (req, res) => {
+    console.log(">>>> ", req.body);
+    Artworks.findOne({ _id: req.params.id }, function(err, objFromDB) {
+        if (err)
+            return res.json({
+                result: false,
+            });
+
+        if (req.files) {
+            var files = Object.values(req.files);
+            var uploadedFileObject = files[0];
+            var uploadedFileName = uploadedFileObject.name;
+            var nowTime = Date.now();
+            var newFileName = `${nowTime}_${uploadedFileName}`;
+
+            uploadedFileObject.mv(`public/${newFileName}`).then(
+                (params) => {
+                    updateAfterFileUpload(req, res, objFromDB, newFileName);
+                },
+                (params) => {
+                    updateAfterFileUpload(req, res, objFromDB);
+                }
+            );
+        } else {
+            updateAfterFileUpload(req, res, objFromDB);
+        }
+
+    });
+});
 
 router.post("/artworks", (req, res) => {
     var collectionModel = new Artworks();
@@ -114,7 +154,36 @@ router.post("/artworks", (req, res) => {
     }
 });
 
-// IMAGE POST// IMAGE POST// IMAGE POST
+
+///GET INDIVIDUAL ARTWORKS
+
+router.get(`/artworks/:id`, (req, res) => {
+    console.log("looking for single artwork infossss");
+    Artworks.findOne({ _id: req.params.id }, function(err, objFromDB) {
+        res.json([objFromDB]);
+
+    });
+});
+
+///GET INDIVIDUAL ARTWORKS
+
+
+///FILTER THROUGH CATEGORIES
+router.get("/artworks/category/:cat_id", (req, res) => {
+    Artworks.find({ cat_id: req.params.cat_id }).then(
+        (artworks) => {
+            res.json(artworks);
+        },
+        (error) => {
+            res.json({ result: 0 });
+        }
+    );
+});
+
+///FILTER THROUGH CATEGORIES
+
+
+// ARTWORK ENDS// ARTWORK ENDS// ARTWORK ENDS// ARTWORK ENDS
 
 
 // POST COMMENTS// POST COMMENTS// POST COMMENTS
@@ -139,54 +208,7 @@ router.post("/comments", (req, res) => {
 // POST COMMENTS// POST COMMENTS// POST COMMENTS
 
 
-// POST ARTWORK// POST ARTWORK// POST ARTWORK
 
-// router.post("/artworks", (req, res) => {
-//     var newartwork = new Artworks();
-
-//     var data = req.body;
-//     console.log(">>> ", data);
-//     Object.assign(newartwork, data);
-
-//     newartwork.save().then(
-//         (result) => {
-//             return res.json(result);
-//         },
-//         () => {
-//             return res.send("problem adding new artwork");
-//         }
-//     );
-// });
-
-
-// POST ARTWORK// POST ARTWORK// POST ARTWORK
-
-
-///FILTER THROUGH CATEGORIES
-router.get("/artworks/category/:cat_id", (req, res) => {
-    Artworks.find({ cat_id: req.params.cat_id }).then(
-        (artworks) => {
-            res.json(artworks);
-        },
-        (error) => {
-            res.json({ result: 0 });
-        }
-    );
-});
-
-///FILTER THROUGH CATEGORIES
-
-///GET INDIVIDUAL ARTWORKS
-
-router.get(`/artworks/:id`, (req, res) => {
-    console.log("looking for single artwork infossss");
-    Artworks.findOne({ _id: req.params.id }, function(err, objFromDB) {
-        res.json([objFromDB]);
-
-    });
-});
-
-///GET INDIVIDUAL ARTWORKS
 
 // GET ROUTES FOR ALL// GET ROUTES FOR ALL// GET ROUTES FOR ALL
 
@@ -218,20 +240,6 @@ router.get("/comments", (req, res) => {
 
 
 // GET ROUTES FOR ALL// GET ROUTES FOR ALL// GET ROUTES FOR ALL
-
-
-// DELETE A WRITER - Will probably never need this
-// send this endpoint the mongo _id and it ill delete the writer
-// router.delete("/writers/:id", (req, res) => {
-//     Writer.deleteOne({ _id: req.params.id }).then(
-//         () => {
-//             res.json({ result: true });
-//         },
-//         () => {
-//             res.json({ result: false });
-//         }
-//     );
-// });
 
 
 
