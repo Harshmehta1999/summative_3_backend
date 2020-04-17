@@ -13,6 +13,7 @@ var ArtworksSchema = new Schema({
     artwork_section: String,
     price: Number,
     image: String,
+    product_description: String,
     cat_id: Number,
     synopsis: String,
     // comment: String,
