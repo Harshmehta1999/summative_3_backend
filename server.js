@@ -205,6 +205,24 @@ router.post("/comments", (req, res) => {
     );
 });
 
+
+
+router.delete("/comments/delete-all", (req, res) => {
+    //CAREFUL with this it works.....
+    Comments.find()
+        .remove({})
+        .then(
+            () => {
+                res.json({ result: true });
+            },
+            () => {
+                res.json({ result: false });
+            }
+        );
+});
+
+
+
 // POST COMMENTS// POST COMMENTS// POST COMMENTS
 
 

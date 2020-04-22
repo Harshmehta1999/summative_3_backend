@@ -15,42 +15,19 @@ var ArtworksSchema = new Schema({
     image: String,
     cat_id: Number,
     synopsis: String,
-    // comment: String,
-    // myImage: String,
-
-    // img: { data: Buffer, contentType: String }
-
-
-
-    // _id: { type: Number, default: Date.now() }
+    id: String,
 }, {
     timestamps: true,
     toJSON: { virtuals: true },
 });
-// ArtworksSchema.virtual("categories", {
-//     ref: "categories",
-//     localField: "id",
-//     foreignField: "cat_id",
-//     justOne: true,
-//     options: { sort: { pages: -1 } }
-
-// });
-
-// ArtworksSchema.virtual("comments", {
-//     ref: "Comments",
-//     localField: "artwork_title",
-//     foreignField: "comment",
-//     justOne: false
-// });
 
 
-// ArtworksSchema.virtual("comments", {
-//     ref: "Comments",
-//     localField: "id",
-//     foreignField: "item_id",
-//     justOne: false
-// });
+ArtworksSchema.virtual("comments", {
+    ref: "Comments",
+    localField: "id",
+    foreignField: "id",
+    justOne: false
+});
 
-// singular capitalized name for the mongo collection
-// the collection in your database should be lowercase and plural
+
 module.exports = mongoose.model("artworks", ArtworksSchema);
