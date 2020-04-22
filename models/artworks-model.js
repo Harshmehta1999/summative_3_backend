@@ -7,7 +7,8 @@ const Comments = require("./comments-model");
 // When viewing book details we may need the writer and user comments
 // so this model links to two other collectons
 
-var ArtworksSchema = new Schema({
+var ArtworksSchema = new Schema(
+  {
     artwork_title: String,
     artwork_subtitle: String,
     artwork_section: String,
@@ -16,18 +17,18 @@ var ArtworksSchema = new Schema({
     cat_id: Number,
     synopsis: String,
     id: String,
-}, {
+  },
+  {
     timestamps: true,
     toJSON: { virtuals: true },
-});
-
+  }
+);
 
 ArtworksSchema.virtual("comments", {
-    ref: "Comments",
-    localField: "id",
-    foreignField: "id",
-    justOne: false
+  ref: "Comment",
+  localField: "id",
+  foreignField: "id",
+  justOne: false,
 });
-
 
 module.exports = mongoose.model("artworks", ArtworksSchema);

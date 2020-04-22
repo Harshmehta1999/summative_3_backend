@@ -1,14 +1,16 @@
 const mongoose = require("mongoose");
 
-var Schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
-var CommentsSchema = new Schema({
+const CommentsSchema = new Schema(
+  {
     comment: String,
-
     id: String,
-}, {
-    timestamps: true
-});
+  },
+  {
+    timestamps: true,
+  }
+);
 
-
-module.exports = mongoose.model("comments", CommentsSchema);
+// singular capitalized name for the mongo collection
+module.exports = mongoose.model("Comment", CommentsSchema);
